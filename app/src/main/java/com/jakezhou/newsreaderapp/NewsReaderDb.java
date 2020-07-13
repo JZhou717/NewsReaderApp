@@ -3,7 +3,9 @@ package com.jakezhou.newsreaderapp;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.jakezhou.newsreaderapp.NewsReaderContract.NewsEntry;
 
@@ -24,7 +26,7 @@ public class NewsReaderDb {
     /**
      * Inserts an entry into the database, returns the primary key of the entry
      */
-    public long addEntry(long id, String title, String content) {
+    public long addEntry(int id, String title, String content) {
         // Map for db entries, key is column name
         ContentValues values = new ContentValues();
         values.put(NewsEntry.COLUMN_NAME_ID, id);
@@ -32,6 +34,18 @@ public class NewsReaderDb {
         values.put(NewsEntry.COLUMN_NAME_CONTENT, content);
 
         return db.insert(NewsEntry.TABLE_NAME, null, values);
+    }
+
+    public int updateEntry(int id, String title, String content) {
+        ContentValues values = new ContentValues();
+        values.put(NewsEntry.COLUMN_NAME_TITLE, title);
+        values.put(NewsEntry.COLUMN_NAME_CONTENT, content);
+
+        return db.update(NewsEntry.TABLE_NAME, values, "id = " + id, null);
+    }
+
+    public void dropTable() {
+        db.execSQL("DROP TABLE IF EXISTS " + NewsEntry.TABLE_NAME);
     }
 
     /**

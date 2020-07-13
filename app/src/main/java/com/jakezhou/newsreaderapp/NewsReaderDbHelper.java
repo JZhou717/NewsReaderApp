@@ -3,6 +3,7 @@ package com.jakezhou.newsreaderapp;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Handler;
 
 import com.jakezhou.newsreaderapp.NewsReaderContract.NewsEntry;
 
@@ -15,14 +16,14 @@ public class NewsReaderDbHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "NewsReader.db";
 
     private static final String SQL_CREATE_ENTRIES =
-            "CREATE TABLE IF NOT EXISTS " + NewsEntry.TABLE_NAME + " (" +
-            NewsEntry.COLUMN_NAME_ID + " INTEGER PRIMARY KEY, " +
+            "CREATE TABLE " + NewsEntry.TABLE_NAME + " (" +
+            NewsEntry._ID + "INTEGER PRIMARY KEY, " +
+            NewsEntry.COLUMN_NAME_ID + " INTEGER, " +
             NewsEntry.COLUMN_NAME_TITLE + " VARCHAR, " +
             NewsEntry.COLUMN_NAME_CONTENT + " TEXT)";
 
     private static final String SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + NewsEntry.TABLE_NAME;
-
 
     public NewsReaderDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -30,6 +31,7 @@ public class NewsReaderDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        db.execSQL(SQL_DELETE_ENTRIES);
         db.execSQL(SQL_CREATE_ENTRIES);
     }
 
@@ -46,4 +48,5 @@ public class NewsReaderDbHelper extends SQLiteOpenHelper {
     public void onDowngrade (SQLiteDatabase db, int oldVersion, int newVersion) {
         onUpgrade(db, oldVersion, newVersion);
     }
+
 }
