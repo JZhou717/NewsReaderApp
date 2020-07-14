@@ -71,6 +71,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }, 1000);
 
+        // TODO: Refresh articles option. Better UI (show time on articles, etc)
+
     }
 
     @Override
