@@ -36,14 +36,6 @@ public class NewsReaderDb {
         return db.insert(NewsEntry.TABLE_NAME, null, values);
     }
 
-    public int updateEntry(int id, String title, String content) {
-        ContentValues values = new ContentValues();
-        values.put(NewsEntry.COLUMN_NAME_TITLE, title);
-        values.put(NewsEntry.COLUMN_NAME_CONTENT, content);
-
-        return db.update(NewsEntry.TABLE_NAME, values, "id = " + id, null);
-    }
-
     public void dropTable() {
         db.execSQL("DROP TABLE IF EXISTS " + NewsEntry.TABLE_NAME);
     }

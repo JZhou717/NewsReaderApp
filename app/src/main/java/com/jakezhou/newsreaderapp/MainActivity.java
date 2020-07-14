@@ -5,9 +5,11 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,16 +31,19 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static NewsReaderDb db;
     private RecyclerView headlinesRecyclerView;
     private RecyclerView.Adapter headlinesAdapter;
     private LinearLayoutManager headlinesManager;
     List<String> headlinesList;
-    private NewsReaderDb db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Setting up connection to SQLite database
+        db = new NewsReaderDb(this);
 
         // Creating empty ArrayList for headlines
         headlinesList = new ArrayList<>();
@@ -57,21 +62,22 @@ public class MainActivity extends AppCompatActivity {
                 headlinesManager.getOrientation()));
 
 
-        // Setting up connection to SQLite database
-        db = new NewsReaderDb(this);
         // Grabbing content of hottest Hacker News Items
-        new RetrieveNewsItems().execute("https://hacker-news.firebaseio.com/v0/topstories.json");
-
-
-        // TODO: When we click on a list item, we should direct to a webview activity that displays either the text or html from url
+        // Giving time for db to finalize creation
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                new RetrieveNewsItems().execute("https://hacker-news.firebaseio.com/v0/topstories.json");
+            }
+        }, 1000);
 
     }
 
     @Override
-    protected void onStop() {
+    protected void onDestroy() {
 
         db.dropTable();
-        super.onStop();
+        super.onDestroy();
     }
 
     // TODO: AsyncTask was deprecated in Feb, 2020. Update this to use a single thread executor in future versions
@@ -207,17 +213,12 @@ public class MainActivity extends AppCompatActivity {
         // Provide a reference to the views for each data item
         // Complex data items may need more than one view per item, and
         // you provide access to all the views for a data item in a view holder
-        public class HeadlinesViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        public class HeadlinesViewHolder extends RecyclerView.ViewHolder {
             //Data items are just strings
             public TextView textView;
             public HeadlinesViewHolder(TextView v) {
                 super(v);
                 textView = v;
-            }
-
-            @Override
-            public void onClick(View v) {
-                Log.e("Clicked", "TESTING CLICK LISTENER");
             }
         }
 
@@ -234,9 +235,22 @@ public class MainActivity extends AppCompatActivity {
         // Replace the contents of a view (invoked by the layout manager)
         @Override
         public void onBindViewHolder(HeadlinesViewHolder holder, int position) {
+
+            final int p = position;
+
             // - get element from your dataset at this position
             // - replace the contents of the view with that element
             holder.textView.setText(headlinesData.get(position));
+            holder.textView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    Log.e("CLICKED", "WE ARE CLICKED");
+                    Intent articleIntent = new Intent(getApplicationContext(), ArticleActivity.class);
+                    articleIntent.putExtra("title", headlinesList.get(p));
+                    startActivity(articleIntent);
+                }
+            });
         }
 
         // Return the size of your dataset (invoked by the layout manager)
